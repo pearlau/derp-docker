@@ -1,0 +1,42 @@
+services:
+  derp:
+    image: ghcr.io/pearlau/derp:latest
+    container_name: derp
+    network_mode: host
+    command: [
+      "--hostname=yourname.com"
+      "--a=0.0.0.0:9650"
+      "--http-port=9650"
+      "--stun-port=3478"
+      "--verify-clients=true"
+      "--certmode=none"
+    ]
+    restart: unless-stopped
+    volumes:
+      - /opt/tailscale/run:/var/run/tailscale
+    logging:
+      driver: json-file
+      options:
+        max-size: 200k
+        max-file: 2
+
+  tailscale:
+    image: ghcr.io/tailscale/tailscale:latest
+    container_name: tailscale
+    restart: unless-stopped
+    hostname: docker
+    network_mode: host
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
+    devices:
+      - /dev/net/tun:/dev/net/tun
+    volumes:
+      - ./tsdata:/var/lib/tailscale
+      - /opt/tailscale/run:/var/run/tailscale
+    environment:
+      - TS_STATE_DIR=/var/lib/tailscale
+      - TS_USERSPACE=false
+      - TS_SOCKET=/var/run/tailscale/tailscaled.sock
+      - TS_ROUTES=10.0.0.0/8
+      - TS_EXTRA_ARGS=--accept-dns=false --login-server https://yourname.com --accept-routes
