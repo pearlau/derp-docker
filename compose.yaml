@@ -1,0 +1,12 @@
+services:
+  derp:
+    image: ghcr.io/pearlau/derp:latest
+    container_name: derp
+    network_mode: host
+    command: --hostname=yourname.com --http-port=9850 --a=0.0.0.0:9850 --stun-port=3478 --verify-clients=false --certmode=none
+    restart: unless-stopped
+    logging:
+      driver: json-file
+      options:
+        max-size: 200k
+        max-file: 2
